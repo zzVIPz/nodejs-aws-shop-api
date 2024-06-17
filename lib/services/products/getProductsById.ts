@@ -19,7 +19,7 @@ const handler = async (event: APIGatewayProxyEvent) => {
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({ data: productDetails }),
+    body: JSON.stringify(productDetails),
   };
 };
 
