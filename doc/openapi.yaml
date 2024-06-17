@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: nodejs-aws-shop-api
+  description: RS Scholl - zzVIPz
+  version: 1.0.0
+servers:
+  - url: https://b84wruc4d2.execute-api.us-east-1.amazonaws.com/prod
+
+paths:
+  /products:
+    get:
+      summary: get all products
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /products/{productId}:
+    get:
+      summary: get product by id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Product'
+        '404':
+          description: Not Found response
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/NotFound'
+
+components:
+  schemas:
+    Product:
+      properties:
+        id:
+          type: integer
+          example: '1'
+        title:
+          type: string
+          example: Product 1
+        price:
+          type: integer
+          example: 10
+        description:
+          type: string
+          example: Description 1
+        count:
+          type: integer
+          example: 10
+    NotFound:
+      properties:
+        message:
+          type: string
+          example: 'Product with ID 1 does not not exist'
