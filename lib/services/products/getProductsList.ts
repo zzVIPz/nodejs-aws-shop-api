@@ -1,10 +1,12 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import { PRODUCTS } from '../data/mock-products-data';
+import { headers } from '../configs/headers.config';
 
-const handler = (event: APIGatewayProxyEvent) => {
+const handler = async (event: APIGatewayProxyEvent) => {
   return {
     statusCode: 200,
-    body: PRODUCTS,
+    headers,
+    body: JSON.stringify({ data: PRODUCTS }),
   };
 };
 
