@@ -5,6 +5,7 @@ info:
   version: 1.0.0
 servers:
   - url: https://b84wruc4d2.execute-api.us-east-1.amazonaws.com/prod
+
 paths:
   /products:
     get:
@@ -18,7 +19,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Product'
-
   /products/{productId}:
     get:
       summary: get product by id
@@ -29,14 +29,17 @@ paths:
             application/json:
               schema:
                 type: object
-                $ref: '#/components/schemas/Product'
+                items:
+                  $ref: '#/components/schemas/Product'
         '404':
           description: Not Found response
           content:
             application/json:
               schema:
                 type: object
-                $ref: '#/components/schemas/NotFound'
+                items:
+                  $ref: '#/components/schemas/NotFound'
+
 components:
   schemas:
     Product:
