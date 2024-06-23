@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { headers } from '../configs/headers.config';
 import * as AWS from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { headers } from '../configs/headers.config';
 import { mergeById } from '../../utils/mergeByID';
 
 const dbClient = new AWS.DynamoDB();

@@ -12,10 +12,8 @@ export const mergeById = (
     if (productsMap[item.product_id]) {
       productsMap[item.product_id] = {
         ...productsMap[item.product_id],
-        ...item,
+        count: item?.count ?? 0,
       };
-    } else {
-      productsMap[item.product_id] = { ...item };
     }
   });
 
