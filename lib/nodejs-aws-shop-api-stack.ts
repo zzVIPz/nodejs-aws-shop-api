@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { join } from 'path';
-import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
 export class NodejsAwsShopApiStack extends Stack {
@@ -77,7 +77,14 @@ export class NodejsAwsShopApiStack extends Stack {
     );
 
     //API Gateway
-    const apiGateway = new RestApi(this, 'core-api');
+    const apiGateway = new RestApi(this, 'core-api', {
+      restApiName: 'MyStore api',
+      defaultCorsPreflightOptions: {
+        allowOrigins: Cors.ALL_ORIGINS,
+        allowMethods: Cors.ALL_METHODS,
+        allowHeaders: Cors.DEFAULT_HEADERS,
+      },
+    });
 
     const productsResource = apiGateway.root.addResource('products');
     const singleProductRecourse = productsResource.addResource('{productId}');
