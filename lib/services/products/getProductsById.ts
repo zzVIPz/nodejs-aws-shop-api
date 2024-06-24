@@ -1,26 +1,60 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
-import { PRODUCTS } from '../data/mock-products-data';
+import * as AWS from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { headers } from '../configs/headers.config';
 
-const handler = async (event: APIGatewayProxyEvent) => {
-  const productId = event?.pathParameters?.productId ?? '';
-  const productDetails = PRODUCTS.get(productId);
+const dbClient = new AWS.DynamoDB();
+const ddbDocClient = DynamoDBDocumentClient.from(dbClient);
 
-  if (!productDetails) {
+const handler = async (event: APIGatewayProxyEvent) => {
+  try {
+    console.log('Get product by ID event: ', JSON.stringify(event, null, 2));
+
+    const productId = event?.pathParameters?.productId ?? '';
+
+    const { Item: productData } = await ddbDocClient.send(
+      new GetCommand({
+        TableName: process.env.productsTableName,
+        Key: {
+          id: productId,
+        },
+      })
+    );
+
+    const { Item: stockData } = await ddbDocClient.send(
+      new GetCommand({
+        TableName: process.env.stocksTableName,
+        Key: {
+          product_id: productId,
+        },
+      })
+    );
+
+    if (!productData) {
+      return {
+        statusCode: 404,
+        headers,
+        body: JSON.stringify({
+          message: `Product with ID ${productId} does not not exist`,
+        }),
+      };
+    }
+
     return {
-      statusCode: 404,
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ ...productData, count: stockData?.count ?? 0 }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
       headers,
       body: JSON.stringify({
-        message: `Product with ID ${productId} does not not exist`,
+        message: 'Internal Server Error',
+        error,
       }),
     };
   }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(productDetails),
-  };
 };
 
 export { handler };
