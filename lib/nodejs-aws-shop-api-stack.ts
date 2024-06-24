@@ -43,11 +43,25 @@ export class NodejsAwsShopApiStack extends Stack {
       },
     });
 
+    const createProductLambda = new NodejsFunction(this, 'createProduct', {
+      runtime: Runtime.NODEJS_20_X,
+      handler: 'handler',
+      functionName: `createProduct`,
+      timeout: Duration.seconds(3),
+      entry: join(__dirname, 'services', 'products', 'createProduct.ts'),
+      environment: {
+        productsTableName: productsTable.tableName,
+        stocksTableName: stocksTable.tableName,
+      },
+    });
+
     //Grant Access
     productsTable.grantReadData(getProductsListLambda);
     stocksTable.grantReadData(getProductsListLambda);
     productsTable.grantReadData(getProductsByIdLambda);
     stocksTable.grantReadData(getProductsByIdLambda);
+    productsTable.grantReadWriteData(createProductLambda);
+    stocksTable.grantReadWriteData(createProductLambda);
 
     //Integrations
     const getProductsListLambdaIntegration = new LambdaIntegration(
@@ -58,6 +72,10 @@ export class NodejsAwsShopApiStack extends Stack {
       getProductsByIdLambda
     );
 
+    const createProductLambdaIntegration = new LambdaIntegration(
+      createProductLambda
+    );
+
     //API Gateway
     const apiGateway = new RestApi(this, 'core-api');
 
@@ -65,6 +83,7 @@ export class NodejsAwsShopApiStack extends Stack {
     const singleProductRecourse = productsResource.addResource('{productId}');
 
     productsResource.addMethod('GET', getProductsListLambdaIntegration);
+    productsResource.addMethod('POST', createProductLambdaIntegration);
     singleProductRecourse.addMethod('GET', getProductByIdLambdaIntegration);
   }
 }

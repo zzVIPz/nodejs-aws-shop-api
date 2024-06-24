@@ -1,7 +1,6 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 import * as AWS from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
-import { PRODUCTS } from '../data/mock-products-data';
 import { headers } from '../configs/headers.config';
 
 const dbClient = new AWS.DynamoDB();
