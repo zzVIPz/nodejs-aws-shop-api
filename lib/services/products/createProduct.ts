@@ -9,6 +9,26 @@ const handler = async (event: APIGatewayProxyEvent) => {
     const id = uuidv4();
 
     const { count, ...product } = JSON.parse(event?.body || '{}');
+    const { title, description, price } = product;
+
+    const isTitleValid = typeof title === 'string' && title.length >= 1;
+    const isDescriptionValid =
+      typeof description === 'string' && description.length >= 1;
+    const isPriceValid = typeof price === 'number';
+    const isCountValid = typeof count === 'number' && Number.isInteger(count);
+
+    if (
+      !isTitleValid ||
+      !isDescriptionValid ||
+      !isPriceValid ||
+      !isCountValid
+    ) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ message: 'Product data is invalid' }),
+      };
+    }
 
     await putItemToDB(process.env.productsTableName, {
       id,
@@ -29,6 +49,7 @@ const handler = async (event: APIGatewayProxyEvent) => {
       headers,
       body: JSON.stringify({
         message: 'Internal Server Error',
+        error,
       }),
     };
   }
