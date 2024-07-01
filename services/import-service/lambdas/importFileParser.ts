@@ -11,7 +11,7 @@ import { Readable } from 'stream';
 const s3Client = new S3Client();
 
 export const handler: S3Handler = async (event) => {
-  console.log('Event: ', JSON.stringify(event));
+  console.log('ImportFileParser Event: ', JSON.stringify(event, null, 2));
 
   const bucketName = event.Records[0].s3.bucket.name;
   const fileKey = event.Records[0].s3.object.key;
@@ -50,7 +50,7 @@ export const handler: S3Handler = async (event) => {
     await s3Client.send(
       new DeleteObjectCommand({ Bucket: bucketName, Key: fileKey })
     );
-  } catch (error) {
-    console.error('Catch error:', error);
+  } catch (e) {
+    console.error('ImportFileParser error:', e);
   }
 };

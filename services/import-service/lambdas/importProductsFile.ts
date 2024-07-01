@@ -8,15 +8,15 @@ const s3Client = new S3Client();
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ) => {
-  console.log('Event: ', JSON.stringify(event));
+  console.log('ImportProductsFile event: ', JSON.stringify(event, null, 2));
   const bucketName = process.env.BUCKET_NAME;
-  const fileKey = event.queryStringParameters?.name;
+  const fileName = event.queryStringParameters?.name;
 
-  if (!fileKey) {
+  if (!fileName) {
     return {
       statusCode: 400,
       headers,
-      body: JSON.stringify({ message: 'File name is required' }),
+      body: JSON.stringify({ message: 'File name is required!' }),
     };
   }
 
@@ -25,7 +25,7 @@ export const handler: APIGatewayProxyHandler = async (
       s3Client,
       new PutObjectCommand({
         Bucket: bucketName,
-        Key: `uploaded/${fileKey}`,
+        Key: `uploaded/${fileName}`,
         ContentType: 'text/csv',
       }),
       {
@@ -42,7 +42,7 @@ export const handler: APIGatewayProxyHandler = async (
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ message: 'Error generating signed URL', error }),
+      body: JSON.stringify({ message: 'Internal Server Error', error }),
     };
   }
 };
