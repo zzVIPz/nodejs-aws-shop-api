@@ -1,5 +1,5 @@
-import { handler as getProductsById } from '../lib/services/products/getProductsById';
-import { PRODUCTS } from '../lib/services/data/mock-products-data';
+import { handler as getProductsById } from '../services/products-service/lambdas/getProductsById';
+import { PRODUCTS } from '../services/products-service/data/mock-products-data';
 import { mockedEvent } from './mock';
 
 describe('getProductsById', () => {

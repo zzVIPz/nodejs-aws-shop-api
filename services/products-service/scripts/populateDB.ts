@@ -1,5 +1,8 @@
-import { PRODUCTS } from '../services/data/mock-products-data';
-import { productsTable, stocksTable } from '../services/const';
+import { PRODUCTS } from '../data/mock-products-data';
+import {
+  productsTable,
+  stocksTable,
+} from '../../../lib/services/products-service/const';
 import { putItemToDB } from '../utils/putItemToDb';
 
 const mockedData = Array.from(PRODUCTS.values());

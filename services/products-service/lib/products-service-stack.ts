@@ -6,7 +6,7 @@ import { join } from 'path';
 import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
-export class NodejsAwsShopApiStack extends Stack {
+export class ProductsServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -24,7 +24,7 @@ export class NodejsAwsShopApiStack extends Stack {
       handler: 'handler',
       functionName: `getProductsList`,
       timeout: Duration.seconds(3),
-      entry: join(__dirname, 'services', 'products', 'getProductsList.ts'),
+      entry: join(__dirname, '../', 'lambdas', 'getProductsList.ts'),
       environment: {
         productsTableName: productsTable.tableName,
         stocksTableName: stocksTable.tableName,
@@ -36,7 +36,7 @@ export class NodejsAwsShopApiStack extends Stack {
       handler: 'handler',
       functionName: `getProductsById`,
       timeout: Duration.seconds(3),
-      entry: join(__dirname, 'services', 'products', 'getProductsById.ts'),
+      entry: join(__dirname, '../', 'lambdas', 'getProductsById.ts'),
       environment: {
         productsTableName: productsTable.tableName,
         stocksTableName: stocksTable.tableName,
@@ -48,7 +48,7 @@ export class NodejsAwsShopApiStack extends Stack {
       handler: 'handler',
       functionName: `createProduct`,
       timeout: Duration.seconds(3),
-      entry: join(__dirname, 'services', 'products', 'createProduct.ts'),
+      entry: join(__dirname, '../', 'lambdas', 'createProduct.ts'),
       environment: {
         productsTableName: productsTable.tableName,
         stocksTableName: stocksTable.tableName,
