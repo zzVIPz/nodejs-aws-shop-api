@@ -56,7 +56,7 @@ export class ImportServiceStack extends Stack {
           sourceMap: true,
           sourceMapMode: SourceMapMode.INLINE,
           sourcesContent: false,
-          nodeModules: ['csv-parser'], // Add this line
+          nodeModules: ['csv-parser'],
         },
       }
     );
