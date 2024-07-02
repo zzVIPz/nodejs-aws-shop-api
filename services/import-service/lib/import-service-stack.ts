@@ -1,5 +1,5 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
-import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
+import { Bucket, EventType, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Construct } from 'constructs';
@@ -11,7 +11,18 @@ export class ImportServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const importBucket = new Bucket(this, 'importBucket');
+    const importBucket = new Bucket(this, 'importBucket', {
+      cors: [
+        {
+          allowedHeaders: ['*'],
+          allowedMethods: [HttpMethods.PUT, HttpMethods.POST],
+          allowedOrigins: [
+            'http://localhost:3000',
+            'https://d3bxh5egtazrmo.cloudfront.net',
+          ],
+        },
+      ],
+    });
 
     const importProductsFileLambda = new NodejsFunction(
       this,
