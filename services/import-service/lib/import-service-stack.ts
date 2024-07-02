@@ -3,7 +3,7 @@ import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Construct } from 'constructs';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { join } from 'path';
 
@@ -39,6 +39,13 @@ export class ImportServiceStack extends Stack {
         entry: join(__dirname, '../', 'lambdas', 'importFileParser.ts'),
         environment: {
           BUCKET_NAME: importBucket.bucketName,
+        },
+        bundling: {
+          minify: true,
+          sourceMap: true,
+          sourceMapMode: SourceMapMode.INLINE,
+          sourcesContent: false,
+          nodeModules: ['csv-parser'], // Add this line
         },
       }
     );
