@@ -1,4 +1,3 @@
-const csvParser = require('csv-parser');
 import { S3Handler } from 'aws-lambda';
 import {
   S3Client,
@@ -6,6 +5,7 @@ import {
   CopyObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
+import * as csv from 'csv-parser';
 
 import { Readable } from 'stream';
 
@@ -26,9 +26,9 @@ export const handler: S3Handler = async (event) => {
 
     await new Promise<void>((resolve, reject) => {
       stream
-        .pipe(csvParser())
+        .pipe(csv())
         .on('data', (data) => {
-          console.log('data: ', data);
+          console.log('Data: ', data);
           results.push(data);
         })
         .on('end', () => {
