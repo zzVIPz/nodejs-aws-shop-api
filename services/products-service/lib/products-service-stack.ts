@@ -7,7 +7,7 @@ import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Topic } from 'aws-cdk-lib/aws-sns';
+import { Topic, SubscriptionFilter } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 
 export class ProductsServiceStack extends Stack {
@@ -25,6 +25,16 @@ export class ProductsServiceStack extends Stack {
 
     createProductTopic.addSubscription(
       new EmailSubscription(process.env.EMAIL ?? 'viperexe@mail.ru')
+    );
+
+    createProductTopic.addSubscription(
+      new EmailSubscription('viperexe11111111123@mail.ru.com', {
+        filterPolicy: {
+          count: SubscriptionFilter.numericFilter({
+            greaterThan: 150,
+          }),
+        },
+      })
     );
 
     // export url & arn of queue
