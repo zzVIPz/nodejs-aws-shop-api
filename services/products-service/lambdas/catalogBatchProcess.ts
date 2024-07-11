@@ -1,10 +1,13 @@
 import { SQSEvent } from 'aws-lambda';
+import { SNSClient, PublishCommand } from '@aws-sdk/client-sns'; // ES Modules import
+
 import * as AWS from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
   TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 
+const snsClient = new SNSClient();
 const dbClient = new AWS.DynamoDB();
 const ddbDocClient = DynamoDBDocumentClient.from(dbClient);
 
@@ -37,6 +40,14 @@ const handler = async (event: SQSEvent) => {
             ],
           })
         );
+      })
+    );
+
+    await snsClient.send(
+      new PublishCommand({
+        TopicArn: process.env.createProductTopic,
+        Message: `AWS - ${event.Records.length} records were created`,
+        Subject: `AWS SNS updates`,
       })
     );
   } catch (error) {

@@ -7,6 +7,8 @@ import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 
 export class ProductsServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -17,6 +19,13 @@ export class ProductsServiceStack extends Stack {
       queueName: 'catalogItemsQueue',
       visibilityTimeout: Duration.seconds(300),
     });
+
+    // SNS
+    const createProductTopic = new Topic(this, 'createProductTopic');
+
+    createProductTopic.addSubscription(
+      new EmailSubscription(process.env.EMAIL ?? 'viperexe@mail.ru')
+    );
 
     // export url & arn of queue
     new CfnOutput(this, 'catalogItemsQueueUrl', {
@@ -85,6 +94,7 @@ export class ProductsServiceStack extends Stack {
         environment: {
           productsTableName: productsTable.tableName,
           stocksTableName: stocksTable.tableName,
+          createProductTopic: createProductTopic.topicArn,
         },
       }
     );
@@ -104,6 +114,7 @@ export class ProductsServiceStack extends Stack {
     stocksTable.grantReadWriteData(createProductLambda);
     productsTable.grantReadWriteData(catalogBatchProcessLambda);
     stocksTable.grantReadWriteData(catalogBatchProcessLambda);
+    createProductTopic.grantPublish(catalogBatchProcessLambda);
 
     //Integrations
     const getProductsListLambdaIntegration = new LambdaIntegration(
