@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { Bucket, EventType, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
@@ -6,6 +6,7 @@ import { Construct } from 'constructs';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { join } from 'path';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export class ImportServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -40,6 +41,9 @@ export class ImportServiceStack extends Stack {
 
     importBucket.grantReadWrite(importProductsFileLambda);
 
+    const catalogItemsQueueUrl = Fn.importValue('catalogItemsQueueUrl');
+    const catalogItemsQueueArn = Fn.importValue('catalogItemsQueueArn');
+
     const importFileParserLambda = new NodejsFunction(
       this,
       'importFileParserLambda',
@@ -50,6 +54,7 @@ export class ImportServiceStack extends Stack {
         entry: join(__dirname, '../', 'lambdas', 'importFileParser.ts'),
         environment: {
           BUCKET_NAME: importBucket.bucketName,
+          QUEUE_URL: catalogItemsQueueUrl,
         },
         bundling: {
           minify: true,
@@ -59,6 +64,13 @@ export class ImportServiceStack extends Stack {
           nodeModules: ['csv-parser'],
         },
       }
+    );
+
+    importFileParserLambda.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['sqs:SendMessage'],
+        resources: [catalogItemsQueueArn],
+      })
     );
 
     importBucket.grantReadWrite(importFileParserLambda);

@@ -1,14 +1,33 @@
-import { Duration, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { join } from 'path';
 import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as lambdaEventSources from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export class ProductsServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    // SQS
+    const catalogItemsQueue = new sqs.Queue(this, 'catalogItemsQueue', {
+      queueName: 'catalogItemsQueue',
+      visibilityTimeout: Duration.seconds(300),
+    });
+
+    // export url & arn of queue
+    new CfnOutput(this, 'catalogItemsQueueUrl', {
+      value: catalogItemsQueue.queueUrl,
+      exportName: 'catalogItemsQueueUrl',
+    });
+
+    new CfnOutput(this, 'catalogItemsQueueArn', {
+      value: catalogItemsQueue.queueArn,
+      exportName: 'catalogItemsQueueArn',
+    });
 
     // Tables
     const stocksTable = Table.fromTableName(this, 'stocks-table', 'stocks');
@@ -54,6 +73,27 @@ export class ProductsServiceStack extends Stack {
         stocksTableName: stocksTable.tableName,
       },
     });
+    const catalogBatchProcessLambda = new NodejsFunction(
+      this,
+      'catalogBatchProcess',
+      {
+        runtime: Runtime.NODEJS_20_X,
+        handler: 'handler',
+        functionName: `catalogBatchProcess`,
+        timeout: Duration.seconds(3),
+        entry: join(__dirname, '../', 'lambdas', 'catalogBatchProcess.ts'),
+        environment: {
+          productsTableName: productsTable.tableName,
+          stocksTableName: stocksTable.tableName,
+        },
+      }
+    );
+
+    catalogBatchProcessLambda.addEventSource(
+      new lambdaEventSources.SqsEventSource(catalogItemsQueue, {
+        batchSize: 5,
+      })
+    );
 
     //Grant Access
     productsTable.grantReadData(getProductsListLambda);
@@ -62,6 +102,8 @@ export class ProductsServiceStack extends Stack {
     stocksTable.grantReadData(getProductsByIdLambda);
     productsTable.grantReadWriteData(createProductLambda);
     stocksTable.grantReadWriteData(createProductLambda);
+    productsTable.grantReadWriteData(catalogBatchProcessLambda);
+    stocksTable.grantReadWriteData(catalogBatchProcessLambda);
 
     //Integrations
     const getProductsListLambdaIntegration = new LambdaIntegration(
