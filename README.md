@@ -1,1 +1,1 @@
-# Task 4 - Integration with S3
+# Task 6 - SQS & SNS, Async Microservices Communication
