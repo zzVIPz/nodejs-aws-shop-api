@@ -1,12 +1,18 @@
 import { Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { Bucket, EventType, HttpMethods } from 'aws-cdk-lib/aws-s3';
-import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import {
+  LambdaIntegration,
+  RestApi,
+  TokenAuthorizer,
+  AuthorizationType,
+} from 'aws-cdk-lib/aws-apigateway';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Construct } from 'constructs';
 import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { join } from 'path';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Function } from 'aws-cdk-lib/aws-lambda';
 
 export class ImportServiceStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -88,9 +94,21 @@ export class ImportServiceStack extends Stack {
 
     const importResource = api.root.addResource('import');
 
+    const basicAuthorizer = new TokenAuthorizer(this, 'basicAuthorizer', {
+      handler: Function.fromFunctionArn(
+        this,
+        'BasicAuthorizer',
+        Fn.importValue('BasicAuthorizerFunctionArn')
+      ),
+    });
+
     importResource.addMethod(
       'GET',
-      new LambdaIntegration(importProductsFileLambda)
+      new LambdaIntegration(importProductsFileLambda),
+      {
+        authorizer: basicAuthorizer,
+        authorizationType: AuthorizationType.CUSTOM,
+      }
     );
   }
 }

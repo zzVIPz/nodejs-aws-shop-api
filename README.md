@@ -1,1 +1,1 @@
-# Task 6 - SQS & SNS, Async Microservices Communication
+# Task 7 - Authorization
