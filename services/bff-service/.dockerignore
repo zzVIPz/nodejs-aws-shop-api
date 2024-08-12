@@ -1,0 +1,27 @@
+# Ignore node_modules directory - all dependencies will be installed during the Docker build process
+node_modules
+
+# Ignore log files - Log files and directories are usually used for debugging
+logs
+*.log
+
+# Ignore Dockerfile and .dockerignore itself - these files are used only for building the Docker image and configuring the Docker build process
+Dockerfile
+.dockerignore
+
+# Ignore temporary files and directories - these files are often used during development or build processes
+tmp
+*.tmp
+
+# Ignore local environment files -This file typically contains environment variables and sensitive configuration details that are specific to your local development environment
+.env
+
+# Ignore built 0 the build process is defined in Dockerfile
+dist
+
+# Ignore SQL scripts - These files are not required for the container’s runtime
+scripts
+
+# Ignore test & specs - These files are related to testing and specification only
+*.spec.ts
+test
